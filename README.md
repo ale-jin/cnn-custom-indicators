@@ -1,7 +1,7 @@
 
 # When to buy Bitcoin - custom CNN indicator
 
-Custom technical indicator using CNN and data from Cryptomon API (https://api.cryptomon.io/swagger-ui.html). For more info about perfomance or implementation, please check original repository: https://github.com/kimber-chen/Tensorflow-for-stock-prediction.
+Custom technical indicator using CNN and data from Cryptomon API (https://api.cryptomon.io/swagger-ui.html). For more info about performance or implementation, please check original repository: https://github.com/kimber-chen/Tensorflow-for-stock-prediction.
 
 ### API Credentials
 
@@ -35,7 +35,7 @@ from tensorflow.python.ops import clip_ops
 from bn_class import *
 
 import sys
-sys.path.append("../../API_Client/") 
+sys.path.append("../API_Client/")
 
 from ApiClient import ApiClient
 ```
@@ -65,8 +65,8 @@ np.set_printoptions(threshold=np.inf)#print full array
 ```python
 ## Cryptomon API credentials
 
-CLIENT_ID = "kMfAt6yw5CtjfumWJwqhZnfuBrd6ReAwDcm9xWmMr3dudSRqSa"
-CLIENT_SECRET = "MCthcjVYccvmrAmBrUnVAeZRSsBv9BPx"
+CLIENT_ID = "<API_CLIENT_ID>"
+CLIENT_SECRET = "<API_CLIENT_SECRET>"
 
 c = ApiClient(CLIENT_ID, CLIENT_SECRET)
 c.request_access()
@@ -125,31 +125,31 @@ def mark_data(item, rows):
     rows_flat = sum(rows, [])
     # print("item: {}".format(item))
     # print("rows_flat: {}".format(rows_flat))
-    
+
     if not rows_flat:
         return False
-    
+
     i_max = max(item)
     i_min = min(item)
-    
+
     r_max = max(rows_flat)
     r_min = min(rows_flat)
-    
+
     # price_series = pd.Series(rows_flat)
     # change = price_series.pct_change()
     # print("change: {}".format(change))
-    
+
     # print("r_max: {}".format(r_max))
     # print("i_min: {}".format(i_min))
-    
+
     change = get_change(r_max, i_min)
     # print("change: {}".format(change))
-    
+
     # 5 % change in 10 days
     if(change > 5):
         return True
     return False
-    
+
 
 data_x_c = data_x[:]
 for index, item in enumerate(data_x):     
@@ -158,12 +158,12 @@ for index, item in enumerate(data_x):
     #print("index: {}".format(index))
     #print("len.data_x: {}".format(len(data_x)))
     #print("len.data: {}".format(len(data)))
-    
+
     if(mark_data(item, data)):
         data_x_c[index].insert(0, 1)
-    else: 
+    else:
         data_x_c[index].insert(0, 0)   
-        
+
 data_x_c = np.array(data_x_c)
 data_x_c = np.around(data_x_c, decimals=2)
 
@@ -260,40 +260,40 @@ for xx in range(0,model_num):
         x_image = tf.reshape(x, [-1,D,1,1])
 
     ## Build the graph
-    # ewma is the decay for which we update the moving average of the 
+    # ewma is the decay for which we update the moving average of the
     # mean and variance in the batch-norm layers
     with tf.name_scope("Conv1") as scope:
         W_conv1 = weight_variable([4, 1, 1, num_filt_1], 'Conv_Layer_1')
         b_conv1 = bias_variable([num_filt_1], 'bias_for_Conv_Layer_1')
         a_conv1 = conv2d(x_image, W_conv1) + b_conv1
-    
+
     with tf.name_scope('Batch_norm_conv1') as scope:
         ewma = tf.train.ExponentialMovingAverage(decay=0.99)                  
         bn_conv1 = ConvolutionalBatchNormalizer(num_filt_1, 0.001, ewma, True)           
-        update_assignments = bn_conv1.get_assigner() 
-        a_conv1 = bn_conv1.normalize(a_conv1, train=bn_train) 
+        update_assignments = bn_conv1.get_assigner()
+        a_conv1 = bn_conv1.normalize(a_conv1, train=bn_train)
         h_conv1 = tf.nn.relu(a_conv1)
-    
+
     with tf.name_scope("Conv2") as scope:
         W_conv2 = weight_variable([4, 1, num_filt_1, num_filt_2], 'Conv_Layer_2')
         b_conv2 = bias_variable([num_filt_2], 'bias_for_Conv_Layer_2')
         a_conv2 = conv2d(h_conv1, W_conv2) + b_conv2
-    
+
     with tf.name_scope('Batch_norm_conv2') as scope:
         bn_conv2 = ConvolutionalBatchNormalizer(num_filt_2, 0.001, ewma, True)           
-        update_assignments = bn_conv2.get_assigner() 
-        a_conv2 = bn_conv2.normalize(a_conv2, train=bn_train) 
+        update_assignments = bn_conv2.get_assigner()
+        a_conv2 = bn_conv2.normalize(a_conv2, train=bn_train)
         h_conv2 = tf.nn.relu(a_conv2)
-      
+
     with tf.name_scope("Conv3") as scope:
         W_conv3 = weight_variable([4, 1, num_filt_2, num_filt_3], 'Conv_Layer_3')
         b_conv3 = bias_variable([num_filt_3], 'bias_for_Conv_Layer_3')
         a_conv3 = conv2d(h_conv2, W_conv3) + b_conv3
-    
+
     with tf.name_scope('Batch_norm_conv3') as scope:
         bn_conv3 = ConvolutionalBatchNormalizer(num_filt_3, 0.001, ewma, True)           
-        update_assignments = bn_conv3.get_assigner() 
-        a_conv3 = bn_conv3.normalize(a_conv3, train=bn_train) 
+        update_assignments = bn_conv3.get_assigner()
+        a_conv3 = bn_conv3.normalize(a_conv3, train=bn_train)
         h_conv3 = tf.nn.relu(a_conv3)
 
     with tf.name_scope("Fully_Connected1") as scope:
@@ -301,7 +301,7 @@ for xx in range(0,model_num):
         b_fc1 = bias_variable([num_fc_1], 'bias_for_Fully_Connected_Layer_1')
         h_conv3_flat = tf.reshape(h_conv3, [-1, D*num_filt_3])
         h_fc1 = tf.nn.relu(tf.matmul(h_conv3_flat, W_fc1) + b_fc1)
-    
+
     with tf.name_scope("Fully_Connected2") as scope:
         h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
         W_fc2 = tf.Variable(tf.truncated_normal([num_fc_1, num_classes], stddev=0.1),name = 'W_fc2')
@@ -309,15 +309,15 @@ for xx in range(0,model_num):
         h_fc2 = tf.matmul(h_fc1_drop, W_fc2) + b_fc2   
     with tf.name_scope("SoftMax") as scope:
         regularizers = (tf.nn.l2_loss(W_conv1) + tf.nn.l2_loss(b_conv1) +
-                      tf.nn.l2_loss(W_conv2) + tf.nn.l2_loss(b_conv2) + 
+                      tf.nn.l2_loss(W_conv2) + tf.nn.l2_loss(b_conv2) +
                       tf.nn.l2_loss(W_conv3) + tf.nn.l2_loss(b_conv3) +
-                      tf.nn.l2_loss(W_fc1) + tf.nn.l2_loss(b_fc1) + 
+                      tf.nn.l2_loss(W_fc1) + tf.nn.l2_loss(b_fc1) +
                       tf.nn.l2_loss(W_fc2) + tf.nn.l2_loss(b_fc2))
 
         loss = tf.nn.sparse_softmax_cross_entropy_with_logits(h_fc2,y_)
         cost = tf.reduce_sum(loss) / batch_size
         cost += regularization*regularizers
- 
+
     ## define train optimizer
     with tf.name_scope("train") as scope:
         tvars = tf.trainable_variables()
@@ -330,16 +330,16 @@ for xx in range(0,model_num):
     with tf.name_scope("Evaluating_accuracy") as scope:
         correct_prediction = tf.equal(tf.argmax(h_fc2,1), y_)
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
-  
+
     ## run session and evaluate performance##
     perf_collect = np.zeros((3,int(np.floor(max_iterations /100))))
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
-    
+
         step = 0      # Step is a counter for filling the numpy array perf_collect
         for i in range(max_iterations):#training process
             batch_ind = np.random.choice(N,batch_size,replace=False)
-      
+
             if i==0:
                 acc_test_before = sess.run(accuracy, feed_dict={ x: X_test, y_: y_test, keep_prob: 1.0, bn_train : False})
             if i%1000 == 0:
@@ -348,14 +348,14 @@ for xx in range(0,model_num):
                 print(" Training accuracy at %s out of %s is %s" % (i,max_iterations, result))
                 step +=1
             sess.run(train_step,feed_dict={x:X_train[batch_ind], y_: y_train[batch_ind], keep_prob: dropout, bn_train : True})
-      
+
         # training process done!
         predict=sess.run(tf.argmax(h_fc2,1), feed_dict={ x: X_test, y_: y_test, keep_prob: 1.0, bn_train : False})
         total_rst[xx]=predict
         print ("xx: {}".format(xx))
         print ("total_rst[xx]: {}".format(total_rst[xx]))
-    
-    
+
+
 ## voting result
 rst_arr= np.zeros(len(total_rst[0]), dtype=np.float)
 for i in range(0,len(total_rst[0])):
@@ -461,12 +461,12 @@ for i in range(0,len(rst_arr)):
     # new_buy[i*10]=rst_arr[i]*close_line[i*10]
     for j in range(0, 10):
         new_buy[i*10 + j]=rst_arr[i]*close_line[i*10 +j]
-    
+
 # for i in range(0,len(y_test)):
 #    for j in range(0, 10):
 #        new_buy[i*10 + j]=y_test[i]*close_line[i*10 + j]
 # new_buy[i*10]=y_test[i]*close_line[i*10]
-    
+
 plt.plot(close_line,label='Close Price',linewidth=1,color=[0,0,1])
 plt.plot(new_buy, 'ro',label='Buy at',linewidth=1,color=[1,0,0])
 # plt.title("When To Buy?("+startDay+"~"+endDay+")")
@@ -493,4 +493,3 @@ plt.show()
     [NbConvertApp] Support files will be in CNN_Classifier_API_files/
     [NbConvertApp] Making directory CNN_Classifier_API_files
     [NbConvertApp] Writing 16426 bytes to CNN_Classifier_API.md
-
